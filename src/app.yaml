@@ -1,0 +1,17 @@
+application: cycleutils
+version: 1
+runtime: python
+api_version: 1
+
+handlers:
+- url: /js
+  static_dir: web/js
+
+- url: /style
+  static_dir: web/style
+
+- url: /img
+  static_dir : web/img
+
+- url: /.*
+  script: helloworld.py
