@@ -1,20 +1,116 @@
 <html>
 <head>
   <title>Average Spoke Tension</title>
-  <link type="text/css" rel="stylesheet" href="/style/main.css"/>  
+  <link type="text/css" rel="stylesheet" href="/style/main.css"/>
+  
+  <script language="javascript">
+  var data = new Array();
+  
+  function populateData() {
+      data["Steel2_6"] = new Array();
+      data["Steel2_6"][27] = 55;
+      data["Steel2_6"][28] = 62;
+      data["Steel2_6"][29] = 69;
+      data["Steel2_6"][30] = 78;
+      data["Steel2_6"][31] = 88;
+      data["Steel2_6"][32] = 100;
+      data["Steel2_6"][33] = 114;
+      data["Steel2_6"][34] = 130;
+      data["Steel2_6"][35] = 150;
+      data["Steel2_6"][36] = 172;
+      
+      data["Steel2_55"] = new Array();
+      data["Steel2_55"][26] = 54;
+      data["Steel2_55"][27] = 60;
+      data["Steel2_55"][28] = 67;
+      data["Steel2_55"][29] = 76;
+      data["Steel2_55"][30] = 85;
+      data["Steel2_55"][31] = 97;
+      data["Steel2_55"][32] = 110;
+      data["Steel2_55"][33] = 125;
+      data["Steel2_55"][34] = 143;
+      data["Steel2_55"][35] = 164;
+      
+      data["Steel2_3"] = new Array();
+      data["Steel2_3"][22] = 54;
+      data["Steel2_3"][23] = 59;
+      data["Steel2_3"][24] = 66;
+      data["Steel2_3"][25] = 73;
+      data["Steel2_3"][26] = 82;
+      data["Steel2_3"][27] = 92;
+      data["Steel2_3"][28] = 104;
+      data["Steel2_3"][29] = 117;
+      data["Steel2_3"][30] = 133;
+      data["Steel2_3"][31] = 151;
+      data["Steel2_3"][32] = 172;
+      
+	  data["Steel2_0"] = new Array();
+	  data["Steel2_0"][17] = 53;
+	  data["Steel2_0"][18] = 58;
+	  data["Steel2_0"][19] = 63;
+	  data["Steel2_0"][20] = 70;
+	  data["Steel2_0"][21] = 77;
+	  data["Steel2_0"][22] = 86;
+	  data["Steel2_0"][23] = 96;
+	  data["Steel2_0"][24] = 107;
+	  data["Steel2_0"][25] = 120;
+	  data["Steel2_0"][26] = 135;
+	  data["Steel2_0"][27] = 153;
+	  data["Steel2_0"][28] = 173;
+	  
+	  data["Steel1_8"] = new Array();
+	  data["Steel1_8"][14] = 53;
+	  data["Steel1_8"][15] = 58;
+	  data["Steel1_8"][16] = 64;
+	  data["Steel1_8"][17] = 70;
+	  data["Steel1_8"][18] = 77;
+	  data["Steel1_8"][19] = 85;
+	  data["Steel1_8"][20] = 94;
+	  data["Steel1_8"][21] = 105;
+	  data["Steel1_8"][22] = 117;
+	  data["Steel1_8"][23] = 131;
+	  data["Steel1_8"][24] = 148;
+	  data["Steel1_8"][25] = 167;
+	  
+
+	  
+  }
+
+  function convertSpokeTensionReading(spokeType, tensionreading) {
+	  // find nearest reading below, and nearest reading above
+	  var tensionLower = data[spokeType][Math.floor(tensionreading)];
+	  var tensionUpper = data[spokeType][Math.floor(tensionreading) + 1];
+	  var tensionFraction = (tensionreading - Math.floor(tensionreading))
+	                           * (tensionUpper - tensionLower);
+	  
+	  var finalTension = tensionLower + tensionFraction;
+	  
+	  return finalTension;
+  }
+  
+  function calculateAverage() {
+	  var tension = parseFloat(document.getElementById("spoke1").value);
+	  var spokeType = document.getElementById("spoketype").value;
+	  
+	  
+	  alert(convertSpokeTensionReading(spokeType, tension))
+  }
+  
+  </script>  
 </head>
-<body>
-<form method="post" action="create">
+<body onLoad="javascript:populateData()">
   <div>
     <p>
       <label for="spoketype">Spoke Type</label>
-      <select name="spoketype">
-      <option value="Steel2_0">Steel 2.0mm</option>
+      <select name="spoketype" id="spoketype">
+        <option value="Steel2_6">Steel Round 2.6mm</option>
+        <option value="Steel2_55">Steel Round 2.55mm</option>
+        <option value="Steel2_3">Steel Round 2.3mm</option>
+        <option value="Steel2_0">Steel Round 2.0mm</option>
+        <option value="Steel1_8">Steel Round 1.8mm</option>
       </select>
+      <input type="text" onChange="javascript:calculateAverage()" id="spoke1" name="spoke1"/>
     </p>
-
   </div>
-</form>
-
 </body>
 </html>
