@@ -14,4 +14,4 @@ handlers:
   static_dir : web/img
 
 - url: /.*
-  script: helloworld.py
+  script: controller.py
