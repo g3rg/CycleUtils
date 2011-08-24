@@ -1,4 +1,13 @@
+Site:
+[ ] Style
+[ ] Menu
+
 Cycle utilities:
-[ ] Spoke tension calculator
 [ ] Average Spoke tension calculator
+    [ ] unit testing of conversion tables
+    [ ] explain errors
+    [ ] determine if error is because of too low or too high tension
 [ ] Gear calculator
+    [ ] single gear calculation
+    [ ] cassette / derailleur etc...
+    

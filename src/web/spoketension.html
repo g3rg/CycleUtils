@@ -121,8 +121,8 @@
 </head>
 <body onLoad="javascript:populateData()">
   <div>
-    <p>
-      <label for="spoketype">Spoke Type</label>
+      <H3>Average Spoke Tension Calculator</H3>
+      <label for="spoketype"><H6>Choose the spoke type and size</H6></label>
       <select name="spoketype" id="spoketype">
         <option value="SteelR2_6">Steel Round 2.6mm</option>
         <option value="SteelR2_55">Steel Round 2.55mm</option>
@@ -140,22 +140,21 @@
         <option value="AluR2_28">Aluminium Round 2.28mm</option>
         <option value="">-----------</option>
       </select>
+      <h6>Enter tension readings from Park Tools TM-1</h6>
       <table>
-      <tr><td><input type="text" onChange="javascript:calculateAverage()" id="spoke1" name="spoke"/></td><td></td></tr>
-      <tr><td><input type="text" onChange="javascript:calculateAverage()" id="spoke2" name="spoke"/></td><td></td></tr>
-      <tr><td><input type="text" onChange="javascript:calculateAverage()" id="spoke3" name="spoke"/></td><td></td></tr>
-      <tr><td><input type="text" onChange="javascript:calculateAverage()" id="spoke4" name="spoke"/></td><td></td></tr>
-      <tr><td><input type="text" onChange="javascript:calculateAverage()" id="spoke5" name="spoke"/></td><td></td></tr>
-      <tr><td><input type="text" onChange="javascript:calculateAverage()" id="spoke6" name="spoke"/></td><td></td></tr>
-      <tr><td><input type="text" onChange="javascript:calculateAverage()" id="spoke7" name="spoke"/></td><td></td></tr>
-      <tr><td><input type="text" onChange="javascript:calculateAverage()" id="spoke8" name="spoke"/></td><td></td></tr>
-      <tr><td><input type="text" onChange="javascript:calculateAverage()" id="spoke9" name="spoke"/></td><td></td></tr>
-      <tr><td><input type="text" onChange="javascript:calculateAverage()" id="spoke10" name="spoke"/></td>
-      <td><input type="text" id="avgTension" name="avgTension"/></td>
-      </tr>
+      <tr><td><input type="text" onChange="javascript:calculateAverage()" id="spoke1" name="spoke"/></td></tr>
+      <tr><td><input type="text" onChange="javascript:calculateAverage()" id="spoke2" name="spoke"/></td></tr>
+      <tr><td><input type="text" onChange="javascript:calculateAverage()" id="spoke3" name="spoke"/></td></tr>
+      <tr><td><input type="text" onChange="javascript:calculateAverage()" id="spoke4" name="spoke"/></td></tr>
+      <tr><td><input type="text" onChange="javascript:calculateAverage()" id="spoke5" name="spoke"/></td></tr>
+      <tr><td><input type="text" onChange="javascript:calculateAverage()" id="spoke6" name="spoke"/></td></tr>
+      <tr><td><input type="text" onChange="javascript:calculateAverage()" id="spoke7" name="spoke"/></td></tr>
+      <tr><td><input type="text" onChange="javascript:calculateAverage()" id="spoke8" name="spoke"/></td></tr>
+      <tr><td><input type="text" onChange="javascript:calculateAverage()" id="spoke9" name="spoke"/></td></tr>
+      <tr><td><input type="text" onChange="javascript:calculateAverage()" id="spoke10" name="spoke"/></td></tr>
+      <tr><td><input type="text" id="avgTension" name="avgTension" disabled=true/> Average KGF</td></tr>
       
       </table>
-    </p>
   </div>
 </body>
 </html>
