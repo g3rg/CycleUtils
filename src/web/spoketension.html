@@ -68,10 +68,32 @@
   }
   
   function calculateAverage() {
-	  var tension = parseFloat(document.getElementById("spoke1").value);
 	  var spokeType = document.getElementById("spoketype").value;
 	  
-	  alert(convertSpokeTensionReading(spokeType, tension))
+	  var tensions = document.getElementsByName("spoke");
+	  
+	  var count=0;
+	  var total=0;
+	  for (var i=0;i<tensions.length;i++){
+		if (tensions[i].value != "") {
+			spokeTension = parseFloat(tensions[i].value);
+			if (isNaN(spokeTension)) {
+			  // SET BACKGROUND TO RED?
+			} else {
+			  total += spokeTension;
+			  count++;
+			}
+		}  
+	  }
+	  
+	  var tension = total / count++;
+	  
+	  var avg = convertSpokeTensionReading(spokeType, tension);
+	  if (isNaN(avg)){
+		  document.getElementById("avgTension").value = "ERROR!";
+	  } else {
+		  document.getElementById("avgTension").value = avg;
+	  }
   }
   
   </script>  
@@ -91,7 +113,21 @@
         <option value="Steel1_5">Steel Round 1.5mm</option>
         <option value="Steel1_4">Steel Round 1.4mm</option>
       </select>
-      <input type="text" onChange="javascript:calculateAverage()" id="spoke1" name="spoke1"/>
+      <table>
+      <tr><td><input type="text" onChange="javascript:calculateAverage()" id="spoke1" name="spoke"/></td><td></td></tr>
+      <tr><td><input type="text" onChange="javascript:calculateAverage()" id="spoke2" name="spoke"/></td><td></td></tr>
+      <tr><td><input type="text" onChange="javascript:calculateAverage()" id="spoke3" name="spoke"/></td><td></td></tr>
+      <tr><td><input type="text" onChange="javascript:calculateAverage()" id="spoke4" name="spoke"/></td><td></td></tr>
+      <tr><td><input type="text" onChange="javascript:calculateAverage()" id="spoke5" name="spoke"/></td><td></td></tr>
+      <tr><td><input type="text" onChange="javascript:calculateAverage()" id="spoke6" name="spoke"/></td><td></td></tr>
+      <tr><td><input type="text" onChange="javascript:calculateAverage()" id="spoke7" name="spoke"/></td><td></td></tr>
+      <tr><td><input type="text" onChange="javascript:calculateAverage()" id="spoke8" name="spoke"/></td><td></td></tr>
+      <tr><td><input type="text" onChange="javascript:calculateAverage()" id="spoke9" name="spoke"/></td><td></td></tr>
+      <tr><td><input type="text" onChange="javascript:calculateAverage()" id="spoke10" name="spoke"/></td>
+      <td><input type="text" id="avgTension" name="avgTension"/></td>
+      </tr>
+      
+      </table>
     </p>
   </div>
 </body>
