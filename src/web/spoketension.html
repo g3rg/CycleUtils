@@ -6,6 +6,25 @@
   <script language="javascript">
   var d = new Array();
   
+  function changeSpoke() {
+	  var tensions = document.getElementsByName("spoke");
+	  var hasValues = false;
+      for (var i=0;i<tensions.length;i++){
+        if (tensions[i].value != "") {
+			hasValues = true;        	
+        	break;
+        }
+      }
+      if (hasValues) {
+    	  if (confirm("Do you wish to empty all spoke tension fields?")) {
+			for (var i=0;i<tensions.length;i++) {
+				tensions[i].value = "";
+			}
+    	  }
+      }
+      calculateAverage();
+  }
+  
   function populateData() {
       d["SteelR2_6"] = new Array();
       d["SteelR2_6"][27]=55;d["SteelR2_6"][28]=62;d["SteelR2_6"][29]=69;d["SteelR2_6"][30]=78;
@@ -74,6 +93,20 @@
       d["AluR2_28"][17]=86;d["AluR2_28"][18]=96;d["AluR2_28"][19]=108;d["AluR2_28"][20]=121;
       d["AluR2_28"][21]=137;d["AluR2_28"][22]=154;d["AluR2_28"][23]=175;
 
+      d["AluB1_5"] = new Array();
+      d["AluB1_5"][7]=52;d["AluB1_5"][8]=58;d["AluB1_5"][9]=65;d["AluB1_5"][10]=72;
+      d["AluB1_5"][11]=81;d["AluB1_5"][12]=91;d["AluB1_5"][13]=103;d["AluB1_5"][14]=116;
+      d["AluB1_5"][15]=130;d["AluB1_5"][16]=147;d["AluB1_5"][17]=166;
+
+      d["AluB1_8"] = new Array();
+      d["AluB1_8"][14]=51;d["AluB1_8"][15]=56;d["AluB1_8"][16]=61;d["AluB1_8"][17]=68;
+      d["AluB1_8"][18]=75;d["AluB1_8"][19]=83;d["AluB1_8"][20]=92;d["AluB1_8"][21]=103;
+      d["AluB1_8"][22]=115;d["AluB1_8"][23]=130;d["AluB1_8"][24]=146;d["AluB1_8"][25]=165;
+
+      d["AluB1_21"] = new Array();
+      d["AluB1_21"][21]=56;d["AluB1_21"][22]=63;d["AluB1_21"][23]=71;d["AluB1_21"][24]=81;
+      d["AluB1_21"][25]=92;d["AluB1_21"][26]=104;d["AluB1_21"][27]=118;d["AluB1_21"][28]=134;
+      d["AluB1_21"][29]=153;d["AluB1_21"][30]=174;
   }
 
   function convertSpokeTensionReading(spokeType, tensionreading) {
@@ -123,7 +156,7 @@
   <div>
       <H3>Average Spoke Tension Calculator</H3>
       <label for="spoketype"><H6>Choose the spoke type and size</H6></label>
-      <select name="spoketype" id="spoketype">
+      <select name="spoketype" id="spoketype" onChange="changeSpoke()">
         <option value="SteelR2_6">Steel Round 2.6mm</option>
         <option value="SteelR2_55">Steel Round 2.55mm</option>
         <option value="SteelR2_3">Steel Round 2.3mm</option>
@@ -138,6 +171,10 @@
         <option value="AluR2_8">Aluminium Round 2.8mm</option>
         <option value="AluR2_54">Aluminium Round 2.54mm</option>
         <option value="AluR2_28">Aluminium Round 2.28mm</option>
+        <option value="">-----------</option>
+        <option value="AluB1_5">Aluminium Blade 1.5 x 3.9mm</option>
+        <option value="AluB1_8">Aluminium Blade 1.8 x 5.3mm</option>
+        <option value="AluB2_1">Aluminium Blade 2.1 x 4.3mm</option>
         <option value="">-----------</option>
       </select>
       <h6>Enter tension readings from Park Tools TM-1</h6>
