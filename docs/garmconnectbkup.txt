@@ -22,23 +22,28 @@ fi
 echo "LETS GET SOME DATA!"
 
 #LOGIN
-wget -q --output-document=/dev/null --save-cookies cookies.txt --keep-session-cookies
-http://connect.garmin.com/signin
+wget -q --output-document=/dev/null --save-cookies cookies.txt --keep-session-cookies http://connect.garmin.com/signin
 
 LOGINDATA="login=login&login%3AloginUsernameField=$USERNAME&login%3Apassword=$PASSWORD&login%3AsignInButton=Sign+In&javax.faces.ViewState=j_id1"
 
-wget -q --output-document=/dev/null --load-cookies cookies.txt --save-cookies cookies.txt
---keep-session-cookies --post-data $LOGINDATA
-https://connect.garmin.com/signin
+wget -q --output-document=/dev/null --load-cookies cookies.txt --save-cookies cookies.txt --keep-session-cookies --post-data $LOGINDATA https://connect.garmin.com/signin
 
 wget -q --output-document=/dev/null --load-cookies cookies.txt http://connect.garmin.com/user/username
 
-wget --load-cookies cookies.txt http://connect.garmin.com/activities
+#Get activities page
+wget -q --output-document=/dev/null --load-cookies cookies.txt --save-cookies cookies.txt --keep-session-cookies http://connect.garmin.com/activities
 
-# search through activities page for all:
-href="/activity/xxxxxxxxxxxxxx", collecting all xxxxxxxxxx
-# then move onto next page!
+for PAGE in 1 2 3 4 5
+do
+       PAGEDATA="AJAXREQUEST=_viewRoot&activitiesForm=activitiesForm&activitiesForm%3AactivitiesGrid%3AAs=-1&javax.faces.ViewState=j_id2&ajaxSingle=activitiesForm%3ApageScroller&activitiesForm%3ApageScroller=$PAGE&AJAX%3AEVENTS_COUNT=1"
+       PAGEFILE="activities_page$PAGE"
+       echo "Getting page $PAGE"
+       wget -q --output-document=$PAGEFILE --load-cookies cookies.txt --save-cookies cookies.txt --keep-session-cookies --post-data $PAGEDATA http://connect.garmin.com/activities
+       # srch for counterContainer to get total number of activities and current count
+       # search for /activity/xxxxxxxxx and store xxxxxxxx in a list for later retrieval
+       # store summary information?
+done
 
-
+echo "DONE!"
 
 #connect.garmin.com/proxy/activity-service-1.0/tcx/activity/EVENT_ID?full=true
