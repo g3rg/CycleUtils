@@ -6,11 +6,12 @@ Created 30/09/2011
 import urllib2
 import cookielib
 
+import optparse
+
 ROOT_URL = "http://connect.garmin.com/"
 SIGN_IN_URL_1="http://connect.garmin.com/signin"
 SIGN_IN_URL_2 = "https://connect.garmin.com/signin"
-USERNAME = "DUMMY"
-PASSWORD = "DUMMY"
+
 COOKIEFILE = "./cookies.txt"
 DEBUG = False
 
@@ -35,7 +36,7 @@ def login(username, password):
     pgFile = urllib2.urlopen(req)
     debugFetch(pgFile, "signin1.html")
 
-    reqData = "login=login&login%3AloginUsernameField=" + USERNAME +"&login%3Apassword=" + PASSWORD + "&login%3AsignInButton=Sign+In&javax.faces.ViewState=j_id1"
+    reqData = "login=login&login%3AloginUsernameField=" + username +"&login%3Apassword=" + password + "&login%3AsignInButton=Sign+In&javax.faces.ViewState=j_id1"
     req = urllib2.Request("https://connect.garmin.com/signin", reqData, headers)
     pgFile = urllib2.urlopen(req)
     debugFetch(pgFile, "signin2.html")
@@ -58,9 +59,20 @@ def login(username, password):
     
     return username == username_returned
 
+def handleArgs():
+    p = optparse.OptionParser()
+    p.add_option("--user", "-u", default="dummy")
+    p.add_option("--password", "-p", default="dummy")
+    options, arguments = p.parse_args()
+    return options
+
 def doMain():
-    #TODO Prompt for username and password!
-    if login(USERNAME, PASSWORD):
+    options = handleArgs()
+    
+    username = options.user
+    password = options.password
+    
+    if login(username, password):
         print "Logged in"
     else:
         print "Failed to login with username and password supplied"
