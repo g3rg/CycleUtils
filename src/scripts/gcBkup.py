@@ -5,50 +5,66 @@ Created 30/09/2011
 
 import urllib2
 import cookielib
-
+import datetime
 import optparse
+import re
 
-ROOT_URL = "http://connect.garmin.com/"
-SIGN_IN_URL_1="http://connect.garmin.com/signin"
-SIGN_IN_URL_2 = "https://connect.garmin.com/signin"
+from BeautifulSoup import BeautifulSoup, SoupStrainer
+
+URL_ROOT = "http://connect.garmin.com/"
+URL_ROOT_HTTPS = "https://connect.garmin.com/"
+URL_SIGN_IN_HTTP = URL_ROOT + "signin"
+URL_SIGN_IN_HTTPS = URL_ROOT_HTTPS + "signin"
+URL_USERNAME = URL_ROOT + "/user/username"
+URL_ACTIVITY_BASE = URL_ROOT + "activities"
+
+HEADERS={'User-agent' : 'Mozilla/4.0 (compatible; MSIE 5.5; Windows NT)'}
 
 DEBUG = False
+DEBUG_FILE = "debug.txt"
 
 cookieJar = None
 
-def debugWrite(str, filename):
+def debugWrite(str):
     if DEBUG:
-        output = open(filename, "w")
+        output = open(DEBUG_FILE, "a")
         output.write(str)
         output.close()
 
-def debugFetch(handle, filename):
+def debugFetch(req, str=None):
     if DEBUG:
-        pgContents = handle.read()
-        debugWrite(pgContents, filename)
-        
+        if str == None:
+            body = req.read()
+        else:
+            body = str
+        debugWrite("FETCHED: " + req.url + "\r\n" + body + "\r\n--------- END OF FETCH\r\n")
+
+def createDebugFile(options):
+    f = open(DEBUG_FILE, "w")
+    f.write("DEBUGGING " + __file__ + "\r\n")
+    f.write(datetime.datetime.now().isoformat() + "\r\n")
+    f.close()
+            
 def initCookieJar():
     global cookieJar
     cookieJar = cookielib.LWPCookieJar()
     opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cookieJar))
     urllib2.install_opener(opener)
-        
-def login(username, password):    
-        
-    headers =  {'User-agent' : 'Mozilla/4.0 (compatible; MSIE 5.5; Windows NT)'}
-    req = urllib2.Request(SIGN_IN_URL_1, None, headers)
-    pgFile = urllib2.urlopen(req)
-    debugFetch(pgFile, "signin1.html")
 
-    reqData = "login=login&login%3AloginUsernameField=" + username +"&login%3Apassword=" + password + "&login%3AsignInButton=Sign+In&javax.faces.ViewState=j_id1"
-    req = urllib2.Request("https://connect.garmin.com/signin", reqData, headers)
-    pgFile = urllib2.urlopen(req)
-    debugFetch(pgFile, "signin2.html")
-    
-    req = urllib2.Request("http://connect.garmin.com/user/username", headers=headers)
+def fetchPage(url, data=None):
+    req = urllib2.Request(url, data, HEADERS)
     pgFile = urllib2.urlopen(req)
     pgContents = pgFile.read()
-    debugWrite(pgContents, "username.txt")
+    debugFetch(pgFile, pgContents)
+    return pgContents
+
+def login(username, password):    
+    fetchPage(URL_SIGN_IN_HTTP)
+    
+    reqData = "login=login&login%3AloginUsernameField=" + username +"&login%3Apassword=" + password + "&login%3AsignInButton=Sign+In&javax.faces.ViewState=j_id1"
+    fetchPage(URL_SIGN_IN_HTTPS, reqData)
+
+    pgContents = fetchPage(URL_USERNAME)
     
     try:
         idx = pgContents.index(":")
@@ -63,12 +79,47 @@ def login(username, password):
     
     return username == username_returned
 
-def getActivityList():
-    #Get activities page
-    print "http://connect.garmin.com/activities"
+def createActivityPageData(pageNum = 1):
+    return "AJAXREQUEST=_viewRoot&activitiesForm=activitiesForm&activitiesForm%3AactivitiesGrid%3AAs=-1" \
+        + "&javax.faces.ViewState=j_id2&ajaxSingle=activitiesForm%3ApageScroller&activitiesForm%3A" \
+        + "pageScroller=" + str(pageNum) + "&AJAX%3AEVENTS_COUNT=1"
 
+def getActivityList():
+    #Get activities page into session
+    fetchPage(URL_ACTIVITY_BASE)
+    pageNum = 1
+    moreData = True
+    activityData = []
     
+    activityStrainer = SoupStrainer('a', href=re.compile('/activity/'))
     
+    while moreData:
+        print "Fetching page " + str(pageNum)
+        reqData = createActivityPageData(pageNum)
+        pgContents = fetchPage(URL_ACTIVITY_BASE, reqData)
+        
+        activities = BeautifulSoup(pgContents, parseOnlyThese=activityStrainer)
+        
+        #Find all links starting with "/activity"
+        for activity in activities:
+            for tup in activity.attrs:
+                if tup[0] == 'href':
+                    id = tup[1][len('/activity/'):]
+                    activityData.append(id)
+                    break
+        
+        # Determine if we are on the last page
+        soup = BeautifulSoup(pgContents)
+        pgCounters = soup.find("div", { "class" : "counterContainer" })
+        counterSoup = BeautifulSoup(str(pgCounters))
+        pageInfo = counterSoup.findAll("b")
+        if (pageInfo[1] == pageInfo[2]):
+            moreData = False
+        
+        pageNum = pageNum + 1
+        
+    return activityData
+
 def handleArgs():
     p = optparse.OptionParser()
     p.add_option("--user", "-u", default="dummy")
@@ -80,6 +131,7 @@ def handleArgs():
     if options.debug == "true":
         global DEBUG
         DEBUG = True
+        createDebugFile(options)
     
     return options
 
@@ -95,7 +147,8 @@ def doMain():
         print "Logged in"
         
         if options.command == "activity":
-            getActivityList()
+            activities = getActivityList()
+            print len(activities)
         else:
             print "Command <" + options.command + "> is not understood, try --help to see help"
     else:
