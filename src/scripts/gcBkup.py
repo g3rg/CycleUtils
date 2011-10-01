@@ -8,6 +8,7 @@ import cookielib
 import datetime
 import argparse
 import re
+import os
 
 from BeautifulSoup import BeautifulSoup, SoupStrainer
 
@@ -17,6 +18,8 @@ URL_SIGN_IN_HTTP = URL_ROOT + "signin"
 URL_SIGN_IN_HTTPS = URL_ROOT_HTTPS + "signin"
 URL_USERNAME = URL_ROOT + "/user/username"
 URL_ACTIVITY_BASE = URL_ROOT + "activities"
+URL_TCX_BASE = URL_ROOT + "/proxy/activity-service-1.0/tcx/activity/"
+URL_TCX_SUFFIX = "?full=true"
 
 HEADERS={'User-agent' : 'Mozilla/4.0 (compatible; MSIE 5.5; Windows NT)'}
 
@@ -84,6 +87,17 @@ def createActivityPageData(pageNum = 1):
         + "&javax.faces.ViewState=j_id2&ajaxSingle=activitiesForm%3ApageScroller&activitiesForm%3A" \
         + "pageScroller=" + str(pageNum) + "&AJAX%3AEVENTS_COUNT=1"
 
+def fetchActivitiesTCX(activities):
+    if not os.path.isdir("activity_tcx"):
+        os.mkdir("activity_tcx")
+    
+    for activity in activities:
+        tcx = fetchPage(URL_TCX_BASE + str(activity) + URL_TCX_SUFFIX)
+        f = open("activity_tcx" + os.path.sep + str(activity) + ".tcx", "w")
+        f.write(tcx)
+        f.close
+    
+
 def getActivityList():
     #Get activities page into session
     fetchPage(URL_ACTIVITY_BASE)
@@ -117,23 +131,19 @@ def getActivityList():
             moreData = False
         
         pageNum = pageNum + 1
-        
+
     return activityData
 
 def handleArgs():
     p = argparse.ArgumentParser(prog='gcBkup',description="Utility for interacting with Garmin Connect")
     
-    #p.add_option("--user", "-u", default="dummy")
-    #p.add_option("--password", "-p", default="dummy")
-    #p.add_option("--command", "-c", default="activity")
-    #p.add_option("--debug", default="false")
-    #options, arguments = p.parse_args()
-    
-    p.add_argument('--user','-u', default="dummy")
-    p.add_argument('--password', '-p', default="dummy")
-    p.add_argument('--debug', '-d', action="store_true")
+    p.add_argument('--user','-u', required=True, help="Your Garmin Connect username")
+    p.add_argument('--password', '-p', required=True, help="Your Garmin Connect password")
+    p.add_argument('--debug', '-d', action="store_true", help="If set, will store cookies and fetched pages in text files")
     p.add_argument('--version', action="version", version='%(prog)s 0.1')
-    p.add_argument('command', nargs='?', default='testlogin')
+    p.add_argument('--verbose', action="store_true", help="Print out more messages during processing")
+    p.add_argument('command', nargs='?', default='testlogin', choices={'testlogin', 'activity_ids', 'fetch_all_tcx'},
+                    help="What do you want to do with Garmin Connect?")
     
     args = p.parse_args()
     
@@ -157,9 +167,14 @@ def doMain():
         
         if options.command == "testlogin":
             print "Credentials verified"
-        elif options.command == "activity":
+        elif options.command == "activity_ids":
             activities = getActivityList()
-            print len(activities)
+            for activity in activities:
+                print str(activity)
+                
+        elif options.command == "fetch_all_tcx":
+            activities = getActivityList()
+            fetchActivitiesTCX(activities)
         else:
             print "Command <" + options.command + "> is not understood, try --help to see help"
     else:
