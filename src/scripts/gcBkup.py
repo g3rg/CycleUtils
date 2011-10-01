@@ -133,7 +133,7 @@ def handleArgs():
     p.add_argument('--password', '-p', default="dummy")
     p.add_argument('--debug', '-d', action="store_true")
     p.add_argument('--version', action="version", version='%(prog)s 0.1')
-    p.add_argument('command', default="activity")
+    p.add_argument('command', nargs='?', default='testlogin')
     
     args = p.parse_args()
     
@@ -155,7 +155,9 @@ def doMain():
     if login(username, password):
         print "Logged in"
         
-        if options.command == "activity":
+        if options.command == "testlogin":
+            print "Credentials verified"
+        elif options.command == "activity":
             activities = getActivityList()
             print len(activities)
         else:
