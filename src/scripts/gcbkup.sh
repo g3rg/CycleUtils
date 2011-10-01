@@ -1,4 +1,7 @@
 #!/bin/bash
+# This script was never finished! Started it to learn some shell scripting, but 
+# then chose to continue the actual development in Python
+
 
 ROOT_URL="http://connect.garmin.com/"
 SIGN_IN_URL="https://connect.garmin.com/signin"
