@@ -12,8 +12,9 @@ ROOT_URL = "http://connect.garmin.com/"
 SIGN_IN_URL_1="http://connect.garmin.com/signin"
 SIGN_IN_URL_2 = "https://connect.garmin.com/signin"
 
-COOKIEFILE = "./cookies.txt"
 DEBUG = False
+
+cookieJar = None
 
 def debugWrite(str, filename):
     if DEBUG:
@@ -26,10 +27,13 @@ def debugFetch(handle, filename):
         pgContents = handle.read()
         debugWrite(pgContents, filename)
         
-def login(username, password):    
+def initCookieJar():
+    global cookieJar
     cookieJar = cookielib.LWPCookieJar()
     opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cookieJar))
     urllib2.install_opener(opener)
+        
+def login(username, password):    
         
     headers =  {'User-agent' : 'Mozilla/4.0 (compatible; MSIE 5.5; Windows NT)'}
     req = urllib2.Request(SIGN_IN_URL_1, None, headers)
@@ -50,20 +54,33 @@ def login(username, password):
         idx = pgContents.index(":")
         idx2 = pgContents.find('"', idx+2)
         username_returned = pgContents[(idx+2):idx2]
-        print username_returned
     except:
         username_returned = ""    
    
     if DEBUG:
+        global cookieJar
         cookieJar.save("cookies.txt", ignore_discard=True)
     
     return username == username_returned
 
+def getActivityList():
+    #Get activities page
+    print "http://connect.garmin.com/activities"
+
+    
+    
 def handleArgs():
     p = optparse.OptionParser()
     p.add_option("--user", "-u", default="dummy")
     p.add_option("--password", "-p", default="dummy")
+    p.add_option("--command", "-c", default="activity")
+    p.add_option("--debug", default="false")
     options, arguments = p.parse_args()
+    
+    if options.debug == "true":
+        global DEBUG
+        DEBUG = True
+    
     return options
 
 def doMain():
@@ -72,12 +89,17 @@ def doMain():
     username = options.user
     password = options.password
     
+    initCookieJar()
+    
     if login(username, password):
         print "Logged in"
+        
+        if options.command == "activity":
+            getActivityList()
+        else:
+            print "Command <" + options.command + "> is not understood, try --help to see help"
     else:
-        print "Failed to login with username and password supplied"
-    
-    print "Done!"
+        print "Failed to login with the username and password supplied"
 
 if __name__ == "__main__":
     doMain()
