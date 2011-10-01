@@ -6,7 +6,7 @@ Created 30/09/2011
 import urllib2
 import cookielib
 import datetime
-import optparse
+import argparse
 import re
 
 from BeautifulSoup import BeautifulSoup, SoupStrainer
@@ -121,19 +121,28 @@ def getActivityList():
     return activityData
 
 def handleArgs():
-    p = optparse.OptionParser()
-    p.add_option("--user", "-u", default="dummy")
-    p.add_option("--password", "-p", default="dummy")
-    p.add_option("--command", "-c", default="activity")
-    p.add_option("--debug", default="false")
-    options, arguments = p.parse_args()
+    p = argparse.ArgumentParser(prog='gcBkup',description="Utility for interacting with Garmin Connect")
     
-    if options.debug == "true":
+    #p.add_option("--user", "-u", default="dummy")
+    #p.add_option("--password", "-p", default="dummy")
+    #p.add_option("--command", "-c", default="activity")
+    #p.add_option("--debug", default="false")
+    #options, arguments = p.parse_args()
+    
+    p.add_argument('--user','-u', default="dummy")
+    p.add_argument('--password', '-p', default="dummy")
+    p.add_argument('--debug', '-d', action="store_true")
+    p.add_argument('--version', action="version", version='%(prog)s 0.1')
+    p.add_argument('command', default="activity")
+    
+    args = p.parse_args()
+    
+    if args.debug:
         global DEBUG
         DEBUG = True
-        createDebugFile(options)
+        createDebugFile(args)
     
-    return options
+    return args
 
 def doMain():
     options = handleArgs()
