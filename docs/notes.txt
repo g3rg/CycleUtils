@@ -23,4 +23,5 @@ Cycle utilities scripts:
     Garmin schemas: http://developer.garmin.com/schemas/
 [ ] Garmin uploader...
     detect garmin drive - GarminDevice.xml in root?
+    http://braiden.org/?p=62
     
