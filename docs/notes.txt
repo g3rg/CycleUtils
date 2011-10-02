@@ -2,7 +2,8 @@ Site:
 [ ] Style
 [ ] Menu
 
-Cycle utilities:
+Cycle utilities web app:
+
 [ ] Average Spoke tension calculator
     [ ] unit testing of conversion tables
     [ ] explain errors
@@ -10,4 +11,16 @@ Cycle utilities:
 [ ] Gear calculator
     [ ] single gear calculation
     [ ] cassette / derailleur etc...
+    
+    
+Cycle utilities scripts:
+[x] Garmin connect activity fetching
+    [ ] update tcx files command?
+    [ ] pass tcx directory as a param
+[ ] TCX Indexer
+    from a directory full of .tcx files, create an index with:
+        start time, distance, avg hr, type?
+    Garmin schemas: http://developer.garmin.com/schemas/
+[ ] Garmin uploader...
+    detect garmin drive - GarminDevice.xml in root?
     

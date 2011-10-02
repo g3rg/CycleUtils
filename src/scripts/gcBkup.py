@@ -8,6 +8,7 @@ import cookielib
 import datetime
 import argparse
 import re
+import os
 
 from BeautifulSoup import BeautifulSoup, SoupStrainer
 
@@ -17,6 +18,8 @@ URL_SIGN_IN_HTTP = URL_ROOT + "signin"
 URL_SIGN_IN_HTTPS = URL_ROOT_HTTPS + "signin"
 URL_USERNAME = URL_ROOT + "/user/username"
 URL_ACTIVITY_BASE = URL_ROOT + "activities"
+URL_TCX_BASE = URL_ROOT + "/proxy/activity-service-1.0/tcx/activity/"
+URL_TCX_SUFFIX = "?full=true"
 
 HEADERS={'User-agent' : 'Mozilla/4.0 (compatible; MSIE 5.5; Windows NT)'}
 
@@ -84,7 +87,21 @@ def createActivityPageData(pageNum = 1):
         + "&javax.faces.ViewState=j_id2&ajaxSingle=activitiesForm%3ApageScroller&activitiesForm%3A" \
         + "pageScroller=" + str(pageNum) + "&AJAX%3AEVENTS_COUNT=1"
 
-def getActivityList():
+def makeActivityPath(id):
+    return "activity_tcx" + os.path.sep + id + ".tcx"
+
+def fetchActivitiesTCX(activities):
+    if not os.path.isdir("activity_tcx"):
+        os.mkdir("activity_tcx")
+    
+    for activity in activities:
+        tcx = fetchPage(URL_TCX_BASE + str(activity) + URL_TCX_SUFFIX)
+        f = open(makeActivityPath(str(activity)), "w")
+        f.write(tcx)
+        f.close
+    
+
+def getActivityList(update=False):
     #Get activities page into session
     fetchPage(URL_ACTIVITY_BASE)
     pageNum = 1
@@ -102,38 +119,41 @@ def getActivityList():
         
         #Find all links starting with "/activity"
         for activity in activities:
-            for tup in activity.attrs:
-                if tup[0] == 'href':
-                    id = tup[1][len('/activity/'):]
-                    activityData.append(id)
-                    break
+            if moreData:
+                for tup in activity.attrs:
+                    if tup[0] == 'href':
+                        id = tup[1][len('/activity/'):]
+                        activityData.append(id)
+                        if update and os.path.exists(makeActivityPath(id)):
+                            moreData = False
+                        break
+            else:
+                break
+                
         
         # Determine if we are on the last page
-        soup = BeautifulSoup(pgContents)
-        pgCounters = soup.find("div", { "class" : "counterContainer" })
-        counterSoup = BeautifulSoup(str(pgCounters))
-        pageInfo = counterSoup.findAll("b")
-        if (pageInfo[1] == pageInfo[2]):
-            moreData = False
-        
-        pageNum = pageNum + 1
-        
+        if moreData:
+            soup = BeautifulSoup(pgContents)
+            pgCounters = soup.find("div", { "class" : "counterContainer" })
+            counterSoup = BeautifulSoup(str(pgCounters))
+            pageInfo = counterSoup.findAll("b")
+            if (pageInfo[1] == pageInfo[2]):
+                moreData = False
+            
+            pageNum = pageNum + 1
+
     return activityData
 
 def handleArgs():
     p = argparse.ArgumentParser(prog='gcBkup',description="Utility for interacting with Garmin Connect")
     
-    #p.add_option("--user", "-u", default="dummy")
-    #p.add_option("--password", "-p", default="dummy")
-    #p.add_option("--command", "-c", default="activity")
-    #p.add_option("--debug", default="false")
-    #options, arguments = p.parse_args()
-    
-    p.add_argument('--user','-u', default="dummy")
-    p.add_argument('--password', '-p', default="dummy")
-    p.add_argument('--debug', '-d', action="store_true")
+    p.add_argument('--user','-u', required=True, help="Your Garmin Connect username")
+    p.add_argument('--password', '-p', required=True, help="Your Garmin Connect password")
+    p.add_argument('--debug', '-d', action="store_true", help="If set, will store cookies and fetched pages in text files")
     p.add_argument('--version', action="version", version='%(prog)s 0.1')
-    p.add_argument('command', nargs='?', default='testlogin')
+    p.add_argument('--verbose', action="store_true", help="Print out more messages during processing")
+    p.add_argument('command', nargs='?', default='testlogin', choices={'testlogin', 'activity_ids', 'fetch_all_tcx', 
+                'update_tcx'}, help="What do you want to do with Garmin Connect?")
     
     args = p.parse_args()
     
@@ -157,9 +177,18 @@ def doMain():
         
         if options.command == "testlogin":
             print "Credentials verified"
-        elif options.command == "activity":
+        elif options.command == "activity_ids":
             activities = getActivityList()
-            print len(activities)
+            for activity in activities:
+                print str(activity)
+                
+        elif options.command == "fetch_all_tcx":
+            activities = getActivityList()
+            fetchActivitiesTCX(activities)
+            
+        elif options.command == "update_tcx":
+            activities = getActivityList(True)
+            fetchActivitiesTCX(activities)
         else:
             print "Command <" + options.command + "> is not understood, try --help to see help"
     else:
