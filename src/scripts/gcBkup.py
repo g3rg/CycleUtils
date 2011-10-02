@@ -99,7 +99,14 @@ def fetchActivitiesTCX(activities):
         f = open(makeActivityPath(str(activity)), "w")
         f.write(tcx)
         f.close
-    
+
+def indexTCX():
+    if not os.path.isdir("activity_tcx"):
+        print "No activity directory, please download your activities first"
+    else:
+        for filename in os.listdir("activity_tcx"):
+            soup = BeautifulSoup(open("activity_tcx" + os.path.sep + filename, "r").read())
+            print str(len(soup.findAll("Activity"))) + " activities found"
 
 def getActivityList(update=False):
     #Get activities page into session
@@ -153,7 +160,7 @@ def handleArgs():
     p.add_argument('--version', action="version", version='%(prog)s 0.1')
     p.add_argument('--verbose', action="store_true", help="Print out more messages during processing")
     p.add_argument('command', nargs='?', default='testlogin', choices={'testlogin', 'activity_ids', 'fetch_all_tcx', 
-                'update_tcx'}, help="What do you want to do with Garmin Connect?")
+                'update_tcx', 'index_tcx'}, help="What do you want to do with Garmin Connect?")
     
     args = p.parse_args()
     
@@ -189,6 +196,9 @@ def doMain():
         elif options.command == "update_tcx":
             activities = getActivityList(True)
             fetchActivitiesTCX(activities)
+            
+        elif options.command == "index_tcx":
+            indexTCX()
         else:
             print "Command <" + options.command + "> is not understood, try --help to see help"
     else:
