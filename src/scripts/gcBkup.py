@@ -106,7 +106,14 @@ def indexTCX():
     else:
         for filename in os.listdir("activity_tcx"):
             soup = BeautifulSoup(open("activity_tcx" + os.path.sep + filename, "r").read())
-            print str(len(soup.findAll("Activity"))) + " activities found"
+            activities = soup.findAll("activity")
+            for activity in activities:
+                for tup in activity.attrs:
+                    if tup[0] == 'sport':
+                        print tup[1]
+                        break
+            
+            print str(len(activities)) + " activities found"
 
 def getActivityList(update=False):
     #Get activities page into session
