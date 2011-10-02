@@ -87,18 +87,21 @@ def createActivityPageData(pageNum = 1):
         + "&javax.faces.ViewState=j_id2&ajaxSingle=activitiesForm%3ApageScroller&activitiesForm%3A" \
         + "pageScroller=" + str(pageNum) + "&AJAX%3AEVENTS_COUNT=1"
 
+def makeActivityPath(id):
+    return "activity_tcx" + os.path.sep + id + ".tcx"
+
 def fetchActivitiesTCX(activities):
     if not os.path.isdir("activity_tcx"):
         os.mkdir("activity_tcx")
     
     for activity in activities:
         tcx = fetchPage(URL_TCX_BASE + str(activity) + URL_TCX_SUFFIX)
-        f = open("activity_tcx" + os.path.sep + str(activity) + ".tcx", "w")
+        f = open(makeActivityPath(str(activity)), "w")
         f.write(tcx)
         f.close
     
 
-def getActivityList():
+def getActivityList(update=False):
     #Get activities page into session
     fetchPage(URL_ACTIVITY_BASE)
     pageNum = 1
@@ -116,21 +119,28 @@ def getActivityList():
         
         #Find all links starting with "/activity"
         for activity in activities:
-            for tup in activity.attrs:
-                if tup[0] == 'href':
-                    id = tup[1][len('/activity/'):]
-                    activityData.append(id)
-                    break
+            if moreData:
+                for tup in activity.attrs:
+                    if tup[0] == 'href':
+                        id = tup[1][len('/activity/'):]
+                        activityData.append(id)
+                        if update and os.path.exists(makeActivityPath(id)):
+                            moreData = False
+                        break
+            else:
+                break
+                
         
         # Determine if we are on the last page
-        soup = BeautifulSoup(pgContents)
-        pgCounters = soup.find("div", { "class" : "counterContainer" })
-        counterSoup = BeautifulSoup(str(pgCounters))
-        pageInfo = counterSoup.findAll("b")
-        if (pageInfo[1] == pageInfo[2]):
-            moreData = False
-        
-        pageNum = pageNum + 1
+        if moreData:
+            soup = BeautifulSoup(pgContents)
+            pgCounters = soup.find("div", { "class" : "counterContainer" })
+            counterSoup = BeautifulSoup(str(pgCounters))
+            pageInfo = counterSoup.findAll("b")
+            if (pageInfo[1] == pageInfo[2]):
+                moreData = False
+            
+            pageNum = pageNum + 1
 
     return activityData
 
@@ -142,8 +152,8 @@ def handleArgs():
     p.add_argument('--debug', '-d', action="store_true", help="If set, will store cookies and fetched pages in text files")
     p.add_argument('--version', action="version", version='%(prog)s 0.1')
     p.add_argument('--verbose', action="store_true", help="Print out more messages during processing")
-    p.add_argument('command', nargs='?', default='testlogin', choices={'testlogin', 'activity_ids', 'fetch_all_tcx'},
-                    help="What do you want to do with Garmin Connect?")
+    p.add_argument('command', nargs='?', default='testlogin', choices={'testlogin', 'activity_ids', 'fetch_all_tcx', 
+                'update_tcx'}, help="What do you want to do with Garmin Connect?")
     
     args = p.parse_args()
     
@@ -174,6 +184,10 @@ def doMain():
                 
         elif options.command == "fetch_all_tcx":
             activities = getActivityList()
+            fetchActivitiesTCX(activities)
+            
+        elif options.command == "update_tcx":
+            activities = getActivityList(True)
             fetchActivitiesTCX(activities)
         else:
             print "Command <" + options.command + "> is not understood, try --help to see help"
