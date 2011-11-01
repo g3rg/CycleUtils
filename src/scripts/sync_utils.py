@@ -11,9 +11,9 @@ sync_utils.py addwebaccount username type username password
     adds details of a web account to the user
 sync_utils.py listwebaccounts username
     list the types of accounts linked to the given username
-? sync_utils.py fetch_summary username account_type
+? sync_utils.py fetchsummary username account_type
     log into account_type and fetch history into summary table
-? sync_utils.py list_pending_uploads username account_type
+? sync_utils.py listpendinguploads username account_type
     compare history files on garmin device with items in summary table and list those files that need to be uploaded
 
 '''
@@ -51,7 +51,7 @@ def initDB():
 
     cursor.execute(
         '''CREATE TABLE IF NOT EXISTS History
-        (id INTEGER PRIMARY KEY, user_id INTEGER, start_time TEXT, duration TEXT, distance TEXT)
+        (id INTEGER PRIMARY KEY, user_id INTEGER, type TEXT, start_time TEXT, duration TEXT, distance TEXT, remote_id TEXT, file_name TEXT)
         ''')
 
     conn.commit()
@@ -112,7 +112,7 @@ def addWebAccount(arguments):
         acc_username = arguments[3]
         acc_password = arguments[4]
 
-        if account_type != 'garmin_connect':
+        if account_type != 'garmin_connect' or account_type != 'test':
             print 'Account type <' + account_type + '> not supported'
             return
 
@@ -147,6 +147,14 @@ def getQueryResults(sql, params):
 
     return detached_results
 
+def execSql(sql, params):
+    conn = sqlite3.connect(DB_FILE)
+    cursor = conn.cursor()
+    cursor.execute(sql, params)
+    conn.commit()
+    cursor.close()
+    conn.close
+
 def listWebAccounts(arguments):
     if len(arguments) < 2:
         print 'You didn''t provide a username'
@@ -157,6 +165,49 @@ def listWebAccounts(arguments):
         results = getQueryResults('SELECT account_type FROM WebAccount WHERE user_id = ?', (user_id,))
         for row in results:
             print row[0]
+    else:
+        print 'User <' + arguments[1] + '> not found'
+
+def getWebAccountDetails(user_id, account_type):
+    return getQueryResults('SELECT id, account_type, account_username, account_password FROM WebAccount WHERE user_id = ? AND account_type = ?',
+            (user_id, account_type))
+
+def fetchSummaries(arguments):
+    if len(arguments) < 3:
+        print 'Not enough arguments for fetchsummary: username account_type'
+        return
+    user_id = getUserId(arguments[1])
+    if user_id:
+        account_type = arguments[2]
+        account_details = getWebAccountDetails(user_id, account_type)
+        if account_details:
+            account_details = account_details[0]
+            if account_details[1] == 'garmin_connect':
+                pass
+            else:
+                print 'Account type <' + account_details[1] + '> not supported for summary fetching'
+        else:
+            print 'No account of type <' + account_type + '> found for user <' + arguments[1] + '>'
+    else:
+        print 'User <' + arguments[1] + '> not found'
+
+def delWebAccount(arguments):
+    if len(arguments) < 3:
+        print 'Not enough arguments for delwebaccount: username account_type'
+        return
+
+    user_id = getUserId(arguments[1])
+    if user_id:
+        account_type = arguments[2]
+        account_details = getWebAccountDetails(user_id, account_type)
+        if account_details:
+            account_details = account_details[0]
+            id = account_details[0]
+            execSql('DELETE FROM WebAccount WHERE user_id = ? AND id = ?', (user_id, account_details[0]))
+            print 'Account <' + account_type + '> deleted for user <' + arguments[1] + '>'
+        else:
+            print 'No account of type <' + account_type + '> found for user <' + arguments[1] + '>'
+
     else:
         print 'User <' + arguments[1] + '> not found'
 
@@ -171,8 +222,12 @@ def doMain():
         addUser(options.commands)
     elif options.commands[0] == 'addwebaccount':
         addWebAccount(options.commands)
+    elif options.commands[0] == 'delwebaccount':
+        delWebAccount(options.commands)
     elif options.commands[0] == 'listwebaccounts':
         listWebAccounts(options.commands)
+    elif options.commands[0] == 'fetchsummary':
+        fetchSummaries(options.commands)
     else:
         print 'Unknown command: ' + options.commands[0]
 
