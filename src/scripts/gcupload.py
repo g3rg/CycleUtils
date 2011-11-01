@@ -148,27 +148,67 @@ def findGarminDevices():
                     
     return paths
 
+def revCmp(x,y):
+    v = cmp(x,y)
+    if v == 0:
+        return v
+    if v < 0:
+        return 1
+    if v > 0:
+        return -1
+
+
+class ActivityInfo(Object):
+    def __init__(self):
+        self.start_time = None
+        self.duration = 0
+        self.distance = 0
+
+def getActivityInfo():
+    
+    # start time, duration (time), distance, 
+    
+    return
+
 def doMain():
     options = handleArgs()
 
     # Find garmin device
 
     devices = findGarminDevices()
-    # TODO select which device!
+    device = None
+    if len(devices) > 1:
+        #TODO Choose devices
+        print 'Need to choose devices!'
+    elif len(devices) == 1:
+        device = devices.keys()[0]
 
-    device = devices['EDGE705']
+    if device:
+        path = devices[device]
+        print 'Searching for files on <' + device + '> in <' + path + '>'
 
-    print device
+        # Find data files
+        historyPath = path + os.path.sep + 'Garmin' + os.path.sep + 'History'
+        
+        l = os.listdir(historyPath)
+        l.sort(revCmp)
 
-    # Find data files
+        # Get already uploaded activity information
+        activities = getActivityInfo()
 
-    
 
-    # login
-    username = options.user
-    password = options.password
+        for filename in l:
+            if filename[len(filename)-4:] == '.tcx':
+                # check if its been uploaded already?
 
-    # upload
+                # if not upload!
+            
+        
+        # login
+        username = options.user
+        password = options.password
+
+        # upload
 
     
 if __name__ == "__main__":
