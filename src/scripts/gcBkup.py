@@ -90,15 +90,38 @@ def createActivityPageData(pageNum = 1):
 def makeActivityPath(id):
     return "activity_tcx" + os.path.sep + id + ".tcx"
 
-def fetchActivitiesTCX(activities):
+def makeActivityStagingPath(id):
+    return "activity_staging" + os.path.sep + id + ".tcx"
+
+
+def fetchActivitiesTCX(activities, staging=False):
     if not os.path.isdir("activity_tcx"):
         os.mkdir("activity_tcx")
+
+    staging_path = "activity_staging"
+    if staging:
+        if not os.path.isdir(staging_path):
+            os.mkdir(staging_path)
+
+        #clear staging directory for new activities
+        folder_path = staging_path
+        for file_object in os.listdir(folder_path):
+            file_object_path = os.path.join(folder_path, file_object)
+            if os.path.isfile(file_object_path):
+                os.unlink(file_object_path)
+            else:
+                shutil.rmtree(file_object_path)
+
     
     for activity in activities:
         tcx = fetchPage(URL_TCX_BASE + str(activity) + URL_TCX_SUFFIX)
         f = open(makeActivityPath(str(activity)), "w")
         f.write(tcx)
         f.close
+        if staging:
+            f = open(makeActivityStagingPath(str(activity)), "w")
+            f.write(tcx)
+            f.close
 
 def indexTCX():
     if not os.path.isdir("activity_tcx"):
@@ -202,7 +225,7 @@ def doMain():
             
         elif options.command == "update_tcx":
             activities = getActivityList(True)
-            fetchActivitiesTCX(activities)
+            fetchActivitiesTCX(activities, True)
             
         elif options.command == "index_tcx":
             indexTCX()
