@@ -160,9 +160,12 @@ def getActivityList(update=False):
                 for tup in activity.attrs:
                     if tup[0] == 'href':
                         id = tup[1][len('/activity/'):]
-                        activityData.append(id)
+                        
                         if update and os.path.exists(makeActivityPath(id)):
                             moreData = False
+                        else:
+                        	activityData.append(id)
+                        
                         break
             else:
                 break

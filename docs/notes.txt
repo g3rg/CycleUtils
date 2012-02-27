@@ -15,8 +15,7 @@ Cycle utilities web app:
     
 Cycle utilities scripts:
 [x] Garmin connect activity fetching
-    [ ] update tcx files command?
-    [ ] pass tcx directory as a param
+    [x] update tcx files command
 [ ] TCX Indexer
     from a directory full of .tcx files, create an index with:
         start time, distance, avg hr, type?
