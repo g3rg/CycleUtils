@@ -1,0 +1,89 @@
+<html>
+<head><title>Graded Test</title>
+<script language="javascript">
+
+var interval = -1;
+
+var timer = null;
+var currTime = 5*60;
+
+function start() {
+	timer = window.setInterval('tick()', 1000);
+}
+
+function stop() {
+	window.clearInterval(timer);
+}
+
+function reset() {
+	interval = -1;
+	currTime = 5*60;
+	displayTime();
+}
+
+function tick() {
+	currTime = currTime -1;
+
+	if (currTime == 0) {
+		interval = interval + 1;
+		currTime = 60;
+		var speed = 25;
+		speed = speed + (interval*2);
+		document.getElementById('intervalName').innerHTML = speed + 'km/hr';
+	}
+
+	displayTime();
+}
+
+function displayTime() {
+	var widget = document.getElementById('time');
+	var minutes = Math.floor(currTime / 60);
+	var seconds = currTime - (minutes * 60);
+	if (seconds < 10) {
+		seconds = '0' + seconds;
+	}
+	widget.innerHTML = minutes + ":" + seconds;
+}
+
+</script>
+</head>
+<body>
+<div style='float:left'>
+<div id='divInstructions'>
+<h3>INSTRUCTIONS</h3>
+<ul>
+<li>Warmup - 5/ 10 minutes</li>
+<li>Start at 25km/hr, increase 2km/hr each minute until speed can't be held for 15s</li>
+<li>At end of each minute, say RPE, current HR for camera</li>
+<li>After test, review video to find when breathing became laboured (VT)</li>
+</ul>
+</div>
+
+<div id='divCurrentFun'>
+<h3>CURRENT INTERVAL:</h3><a href='javascript:start()'>Start</a>&nbsp;&nbsp;<a href='javascript:stop()'>Stop</a>&nbsp;&nbsp;<a href='javascript:reset()'>Reset</a><br/>
+<font size="+5"><span id='intervalName'>WARMUP</span>&nbsp;<span id='time'>5:00</span></font>
+</div>
+</div>
+<div id='divRPE' style='float:right'>
+RPE
+<table>
+<tr><td>6</td><td>&nbsp;</td></tr>
+<tr><td>7</td><td>Very, very light</td></tr>
+<tr><td>8</td><td>&nbsp;</td></tr>
+<tr><td>9</td><td>Very light</td></tr>
+<tr><td>10</td><td>&nbsp;</td></tr>
+<tr><td>11</td><td>Fairly light</td></tr>
+<tr><td>12</td><td>&nbsp;</td></tr>
+<tr><td>13</td><td>Somewhat hard</td></tr>
+<tr><td>14</td><td>&nbsp;</td></tr>
+<tr><td>15</td><td>Hard</td></tr>
+<tr><td>16</td><td>&nbsp;</td></tr>
+<tr><td>17</td><td>Very hard</td></tr>
+<tr><td>18</td><td>&nbsp;</td></tr>
+<tr><td>19</td><td>Very, very hard</td></tr>
+<tr><td>20</td><td>&nbsp;</td></tr>
+</table>
+</div>
+
+</body>
+</html>
